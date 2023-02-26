@@ -211,6 +211,7 @@ struct tcp_cookie_transactions {
 #include <net/inet_connection_sock.h>
 #include <net/inet_timewait_sock.h>
 
+//传输层协议首部获取方法
 static inline struct tcphdr *tcp_hdr(const struct sk_buff *skb)
 {
 	return (struct tcphdr *)skb_transport_header(skb);

@@ -40,6 +40,7 @@ struct udphdr {
 #include <linux/skbuff.h>
 #include <net/netns/hash.h>
 
+//提取传输层协议的首部，这里是udp，还有一个tcp_hdr
 static inline struct udphdr *udp_hdr(const struct sk_buff *skb)
 {
 	return (struct udphdr *)skb_transport_header(skb);

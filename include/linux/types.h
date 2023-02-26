@@ -174,8 +174,8 @@ typedef u32 dma_addr_t;
 #define __bitwise
 #endif
 
-typedef __u16 __bitwise __le16;
-typedef __u16 __bitwise __be16;
+typedef __u16 __bitwise __le16;//位长16小端序
+typedef __u16 __bitwise __be16;//位长16大端序
 typedef __u32 __bitwise __le32;
 typedef __u32 __bitwise __be32;
 typedef __u64 __bitwise __le64;

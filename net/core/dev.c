@@ -5749,9 +5749,10 @@ struct netdev_queue *dev_ingress_queue_create(struct net_device *dev)
 
 /**
  *	alloc_netdev_mqs - allocate network device
+ * 分配一个新的struct net_device实例
  *	@sizeof_priv:	size of private data to allocate space for
  *	@name:		device name format string
- *	@setup:		callback to initialize device
+ *	@setup:		callback to initialize device  函数，用于初始化设备，不同的设备对应的初始化函数各不相同
  *	@txqs:		the number of TX subqueues to allocate
  *	@rxqs:		the number of RX subqueues to allocate
  *

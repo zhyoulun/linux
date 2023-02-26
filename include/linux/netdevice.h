@@ -1199,6 +1199,7 @@ struct net_device {
 					  */
 
 	/* Interface address info used in eth_type_trans() */
+	//存储设备的硬件地址，例如mac地址
 	unsigned char		*dev_addr;	/* hw address, (before bcast
 						   because most packets are
 						   unicast) */
@@ -1206,6 +1207,7 @@ struct net_device {
 	struct netdev_hw_addr_list	dev_addrs; /* list of device
 						      hw addresses */
 
+	//用于向附接的所有站点发送消息的广播地址
 	unsigned char		broadcast[MAX_ADDR_LEN];	/* hw bcast add	*/
 
 #ifdef CONFIG_RPS

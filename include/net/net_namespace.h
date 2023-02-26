@@ -34,6 +34,7 @@ struct netns_ipvs;
 #define NETDEV_HASHENTRIES (1 << NETDEV_HASHBITS)
 
 struct net {
+	//使用计数器
 	atomic_t		count;		/* To decided when the network
 						 *  namespace should be freed.
 						 */
@@ -44,11 +45,14 @@ struct net {
 #endif
 	spinlock_t		rules_mod_lock;
 
+	//net_namespace_list链表元素
 	struct list_head	list;		/* list of network namespaces */
 	struct list_head	cleanup_list;	/* namespaces on death row */
 	struct list_head	exit_list;	/* Use only net_mutex */
 
+	//代表/proc/net
 	struct proc_dir_entry 	*proc_net;
+	//代表/proc/net/stats
 	struct proc_dir_entry 	*proc_net_stat;
 
 #ifdef CONFIG_SYSCTL
@@ -58,6 +62,9 @@ struct net {
 	struct sock 		*rtnl;			/* rtnetlink socket */
 	struct sock		*genl_sock;
 
+	//网络设备由struct net_device表示。与特定命名空间关联的所有设备都保存在一个双向链表
+	//表头是dev_base_head
+	//各个设备还通过另外两个双向链表维护：将设备名用作散列键，另一个将接口索引用作散列键
 	struct list_head 	dev_base_head;
 	struct hlist_head 	*dev_name_head;
 	struct hlist_head	*dev_index_head;
@@ -66,11 +73,13 @@ struct net {
 	struct list_head	rules_ops;
 
 
+	//loopback设备，虚拟网络设备
 	struct net_device       *loopback_dev;          /* The loopback */
 	struct netns_core	core;
 	struct netns_mib	mib;
 	struct netns_packet	packet;
 	struct netns_unix	unx;
+	//存储协议参数，只前是全局的
 	struct netns_ipv4	ipv4;
 #if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
 	struct netns_ipv6	ipv6;
@@ -115,7 +124,7 @@ static inline struct net *copy_net_ns(unsigned long flags, struct net *net_ns)
 }
 #endif /* CONFIG_NET */
 
-
+//所有可用的命名空间都保存在这里，一个双向链表
 extern struct list_head net_namespace_list;
 
 extern struct net *get_net_ns_by_pid(pid_t pid);

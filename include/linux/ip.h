@@ -107,6 +107,7 @@ struct iphdr {
 #ifdef __KERNEL__
 #include <linux/skbuff.h>
 
+//ip层的辅助函数
 static inline struct iphdr *ip_hdr(const struct sk_buff *skb)
 {
 	return (struct iphdr *)skb_network_header(skb);

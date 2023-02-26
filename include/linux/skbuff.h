@@ -111,11 +111,13 @@ struct nf_bridge_info {
 };
 #endif
 
+//使用了一个表头来实现套接字缓冲区的等待队列
 struct sk_buff_head {
 	/* These two members must be first. */
 	struct sk_buff	*next;
 	struct sk_buff	*prev;
 
+	//指定了等待队列的长度
 	__u32		qlen;
 	spinlock_t	lock;
 };
@@ -324,12 +326,16 @@ typedef unsigned char *sk_buff_data_t;
 
 struct sk_buff {
 	/* These two members must be first. */
+	//双向链表
 	struct sk_buff		*next;
 	struct sk_buff		*prev;
 
+	//分组到达的事件
 	ktime_t			tstamp;
 
+	//指向用于处理该分组的套接字对应的socket实例
 	struct sock		*sk;
+	//处理分组的网络设备，这个可能会发生变化，例如发送和接受的设备不一样
 	struct net_device	*dev;
 
 	/*
@@ -344,10 +350,10 @@ struct sk_buff {
 #ifdef CONFIG_XFRM
 	struct	sec_path	*sp;
 #endif
-	unsigned int		len,
-				data_len;
-	__u16			mac_len,
-				hdr_len;
+	unsigned int		len,//协议头的长度+数据的长度
+				data_len;//数据块长度
+	__u16			mac_len,//数据链路层协议头的长度
+				hdr_len;//针对克隆数据包时使用的，它表明克隆的数据包的头长度；当克隆socket buffer时，可以只克隆数据，此时需要从hdr_len中获取头长度
 	union {
 		__wsum		csum;
 		struct {
@@ -370,7 +376,7 @@ struct sk_buff {
 	kmemcheck_bitfield_end(flags1);
 	__be16			protocol;
 
-	void			(*destructor)(struct sk_buff *skb);
+	void			(*destructor)(struct sk_buff *skb);//socket buffer的析构函数
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	struct nf_conntrack	*nfct;
 #endif
@@ -420,10 +426,11 @@ struct sk_buff {
 	/* These elements must be at the end, see alloc_skb() for details.  */
 	sk_buff_data_t		tail;
 	sk_buff_data_t		end;
-	unsigned char		*head,
-				*data;
+	unsigned char		*head,//head和end指向整个数据包缓冲区的起始地址和结束地址
+				*data;//data和tail指向实际数据的起始地址和结束地址
+				//各层协议处理函数可以在data和head之间的空隙处填写头信息，在tail和end之间放心的数据
 	unsigned int		truesize;
-	atomic_t		users;
+	atomic_t		users;//引用计数，所有正在使用改sk_buff缓冲区的进程计数，防止被误释放
 };
 
 #ifdef __KERNEL__
@@ -492,6 +499,7 @@ extern void consume_skb(struct sk_buff *skb);
 extern void	       __kfree_skb(struct sk_buff *skb);
 extern struct sk_buff *__alloc_skb(unsigned int size,
 				   gfp_t priority, int fclone, int node);
+//分配一个新的sk_buff实例
 static inline struct sk_buff *alloc_skb(unsigned int size,
 					gfp_t priority)
 {
@@ -1257,16 +1265,19 @@ static inline void skb_reserve(struct sk_buff *skb, int len)
 }
 
 #ifdef NET_SKBUFF_DATA_USES_OFFSET
+//指向传输层首部的指针
 static inline unsigned char *skb_transport_header(const struct sk_buff *skb)
 {
 	return skb->head + skb->transport_header;
 }
 
+//将传输层首部重置为数据部分的起始位置
 static inline void skb_reset_transport_header(struct sk_buff *skb)
 {
 	skb->transport_header = skb->data - skb->head;
 }
 
+//根据数据部分中给定的偏移量来设置传输首部的起始位置
 static inline void skb_set_transport_header(struct sk_buff *skb,
 					    const int offset)
 {
